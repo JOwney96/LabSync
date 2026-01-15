@@ -1,7 +1,7 @@
-#LabSync: University Equipment Checkout System
+# LabSync: University Equipment Checkout System
 LabSync is a full-stack web application designed to streamline the process of borrowing and managing university lab equipment. It handles the lifecycle of inventory—from student reservation requests to administrative approval and physical check-in/check-out.
 
-#Key Features:
+# Key Features:
 
 Real-time Availability: Prevents double-booking with date-range conflict detection.
 
