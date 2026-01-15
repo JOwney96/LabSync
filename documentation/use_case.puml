@@ -1,0 +1,17 @@
+@startuml
+left to right direction
+
+"Student" as user
+"Lab Manager" as admin
+"System" as system
+
+user --> (Browse and Search Inventory)
+user --> (Create Reservation)
+
+admin --> (Approve/Deny Request)
+admin --> (Physical Check-Out [Starts the loan timer])
+admin --> (Return Item)
+
+system --> (Detect Overdue Items)
+system --> (Reservation Conflict Prevention)
+@enduml
