@@ -1,0 +1,60 @@
+Install Prerequisites:
+	- git
+		- cli: https://git-scm.com/install/
+	- php
+		- https://www.php.net/downloads.php
+	- composer
+		- https://getcomposer.org/download/
+	- laravel
+		- After php and composer
+		- Run in termial "composer global require laravel/installer"
+	- npm
+		- install with nvm
+		- windows: https://github.com/coreybutler/nvm-windows
+			- nvm install lts
+			- nvm use lts
+		- unix and macOS:https://github.com/nvm-sh/nvm
+			- nvm install --lts
+			- nvm use --lts
+			
+Clone project:
+	- Open termial
+	- cd to where we will store the project
+		- Windows Phpstorm: C:\Users\"your username"\PhpstormProjects
+		- Linux Phpstorm: ~/"your username"/PhpstormProjects
+	- git clone https://github.com/JOwney96/LabSync
+	
+Configure php extenstions
+	- php --ini
+		- Loaded Configuration File: "'your path here'\php.ini"
+	- Open the php.ini file in a text editor
+		- Search for the following items and delete the ; in front of them
+			- extension=fileinfo
+			- extension=pdo_sqlite
+			- extension=sqlite3
+			- extension=pdo_mysql <- this is optional
+			
+Initialize the project
+	- In the termial cd to the project's root.
+		- cd "where you cloned the project"\LabSync
+	- composer install
+	- php artisan migrate
+		- yes to both
+	- npm install
+	- npm run build
+	- cp .\.env.example .\.env
+	- composer run dev
+	- If works, a line will say "INFO  Server running on [http://127.0.0.1:8000]."
+	- Go to that link and confirm it works
+		- Will get a laravel "let's get started" page
+	- Close the server
+	
+Set up Phpstorm:
+	- Open project in phpstorm
+	- Open the composer.json file
+	- Find the line that has "dev" on it
+	- Find and click the play button on the left of that line.
+	- Same should happen above where the server is running and you get the laravel page.
+	
+Relax
+	- We are done

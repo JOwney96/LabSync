@@ -11,7 +11,13 @@ user --> (Create Reservation)
 admin --> (Approve/Deny Request)
 admin --> (Physical Check-Out [Starts the loan timer])
 admin --> (Return Item)
+admin --> (Add Items)
+admin --> (Remove Items)
+admin --> (Send for repairs)
 
 system --> (Detect Overdue Items)
 system --> (Reservation Conflict Prevention)
+system --> (Limit number of check-outs)
+system --> (Send notifications/reminders)
+system --> (Timeout reservations)
 @enduml
