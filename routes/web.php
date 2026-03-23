@@ -12,8 +12,10 @@ Route::get('/test-db', function () {
     return DB::select('SELECT * FROM equipment');
 });
 
-Route::get('/equipment', function () {
-    $items = DB::select("
+Route::middleware(['auth'])->group(function () {
+
+    Route::get('/equipment', function () {
+        $items = DB::select("
         SELECT
             e.*,
             (
@@ -26,20 +28,20 @@ Route::get('/equipment', function () {
         ORDER BY e.name
     ");
 
-    return view('equipment.index', [
-        'title' => 'Equipment List',
-        'items' => $items,
-    ]);
-});
+        return view('equipment.index', [
+            'title' => 'Equipment List',
+            'items' => $items,
+        ]);
+    });
 
-Route::get('/equipment/{id}', function ($id) {
-    $equipment = DB::selectOne('SELECT * FROM equipment WHERE id = ?', [$id]);
+    Route::get('/equipment/{id}', function ($id) {
+        $equipment = DB::selectOne('SELECT * FROM equipment WHERE id = ?', [$id]);
 
-    if (! $equipment) {
-        abort(404);
-    }
+        if (!$equipment) {
+            abort(404);
+        }
 
-    $items = DB::select("
+        $items = DB::select("
         SELECT
             ei.*,
             c.user_name AS checkout_user_name,
@@ -52,65 +54,61 @@ Route::get('/equipment/{id}', function ($id) {
         ORDER BY ei.id
     ", [$id]);
 
-    return view('equipment.show', [
-        'title' => $equipment->name,
-        'equipment' => $equipment,
-        'items' => $items,
-    ]);
-});
+        return view('equipment.show', [
+            'title' => $equipment->name,
+            'equipment' => $equipment,
+            'items' => $items,
+        ]);
+    });
 
-Route::post('/checkout-item/{id}', function (Request $request, $id) {
-    $item = DB::selectOne('SELECT * FROM equipment_items WHERE id = ?', [$id]);
+    Route::post('/checkout-item/{id}', function (Request $request, $id) {
+        $item = DB::selectOne('SELECT * FROM equipment_items WHERE id = ?', [$id]);
 
-    if (! $item || $item->status !== 'Available') {
-        return 'Item is not available.';
-    }
+        if (!$item || $item->status !== 'Available') {
+            return 'Item is not available.';
+        }
 
-    $userName = trim($request->input('user_name'));
+        $userName = auth()->user()->name;
 
-    if ($userName === '') {
-        return 'User name is required.';
-    }
-
-    DB::table('checkouts')->insert([
-        'equipment_item_id' => $id,
-        'user_name' => $userName,
-        'checkout_date' => now(),
-        'return_date' => null,
-        'status' => 'Checked Out',
-    ]);
-
-    DB::table('equipment_items')
-        ->where('id', $id)
-        ->update(['status' => 'Checked Out']);
-
-    return redirect('/equipment/'.$item->equipment_id);
-});
-
-Route::post('/return-item/{id}', function ($id) {
-    $item = DB::selectOne('SELECT * FROM equipment_items WHERE id = ?', [$id]);
-
-    if (! $item) {
-        return 'Item not found.';
-    }
-
-    DB::table('equipment_items')
-        ->where('id', $id)
-        ->update(['status' => 'Available']);
-
-    DB::table('checkouts')
-        ->where('equipment_item_id', $id)
-        ->where('status', 'Checked Out')
-        ->update([
-            'status' => 'Returned',
-            'return_date' => now(),
+        DB::table('checkouts')->insert([
+            'equipment_item_id' => $id,
+            'user_name' => $userName,
+            'checkout_date' => now(),
+            'return_date' => null,
+            'status' => 'Checked Out',
         ]);
 
-    return redirect('/equipment/'.$item->equipment_id);
-});
+        DB::table('equipment_items')
+            ->where('id', $id)
+            ->update(['status' => 'Checked Out']);
 
-Route::get('/checkouts', function () {
-    $rows = DB::select('
+        return redirect('/equipment/' . $item->equipment_id);
+    });
+
+    Route::post('/return-item/{id}', function ($id) {
+        $item = DB::selectOne('SELECT * FROM equipment_items WHERE id = ?', [$id]);
+
+        if (!$item) {
+            return 'Item not found.';
+        }
+
+        DB::table('equipment_items')
+            ->where('id', $id)
+            ->update(['status' => 'Available']);
+
+        DB::table('checkouts')
+            ->where('equipment_item_id', $id)
+            ->where('status', 'Checked Out')
+            ->update([
+                'status' => 'Returned',
+                'return_date' => now(),
+            ]);
+
+        return redirect('/equipment/' . $item->equipment_id);
+    });
+
+    Route::get('/checkouts', function () {
+        $rows = DB::select('
         SELECT
             c.id,
             c.user_name,
@@ -125,8 +123,13 @@ Route::get('/checkouts', function () {
         ORDER BY c.id DESC
     ');
 
-    return view('checkouts.index', [
-        'title' => 'Checkout History',
-        'rows' => $rows,
-    ]);
+        return view('checkouts.index', [
+            'title' => 'Checkout History',
+            'rows' => $rows,
+        ]);
+    })->middleware('role:admin|teacher');
 });
+
+require __DIR__.'/auth.php';
+
+
