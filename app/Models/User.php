@@ -3,13 +3,15 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Providers\database\factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\App\Providers\database\factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
     /**
@@ -33,6 +35,18 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    // --- Relationships ---
+
+    public function checkoutRequests(): HasMany
+    {
+        return $this->hasMany(CheckoutRequest::class);
+    }
+
+    public function equipments(): HasMany
+    {
+        return $this->hasMany(Equipment::class);
+    }
 
     /**
      * Get the attributes that should be cast.

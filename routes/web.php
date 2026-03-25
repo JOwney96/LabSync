@@ -5,17 +5,29 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return redirect()->route('register');
-});
+})->name('root');
 
 // REGULAR USER ROUTES
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth'])->name('dashboard');
+Route::livewire('/dashboard', 'pages::student-dashboard')
+    ->middleware(['auth'])
+    ->name('student.dashboard');
+
+Route::livewire('/student/requests', 'pages::student-requests')
+    ->middleware(['auth'])
+    ->name('student.requests');
+
 
 // ADMIN ONLY ROUTES
+Route::livewire('/admin/dashboard', 'pages::admin-dashboard')
+    ->name('admin.dashboard')
+    ->middleware(['auth', 'admin']);
+
 Route::get('/admin/inventory', function () {
     return view('admin.inventory');
-})->middleware(['auth', 'admin'])->name('admin.inventory');
+})
+    ->name('admin.inventory')
+    ->middleware(['auth', 'admin']);
+
 
 // PROFILE ROUTES
 Route::middleware('auth')->group(function () {
@@ -24,4 +36,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
