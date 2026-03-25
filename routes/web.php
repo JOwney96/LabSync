@@ -23,8 +23,19 @@ Route::livewire('/student/requests', 'pages::student-requests')
 
 // ADMIN ONLY ROUTES
 Route::livewire('/admin/dashboard', 'pages::admin-dashboard')
-    ->name('admin.dashboard')
-    ->middleware(['auth', 'admin']);
+    ->middleware(['auth', 'admin'])
+    ->name('admin.dashboard');
+
+Route::livewire('/admin/requests', 'pages::admin-requests')
+    ->middleware(['auth', 'admin'])
+    ->name('admin.requests');
+
+Route::get('/admin/equipment', function () {
+    return view('pages.admin-equipment');
+})
+    ->middleware(['auth', 'admin'])
+    ->name('admin.equipment');
+
 
 /*Route::get('/admin/inventory', function () {
     return view('admin.inventory');
