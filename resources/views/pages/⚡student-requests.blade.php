@@ -56,6 +56,8 @@ new class extends Component {
 
 <div class="min-h-screen bg-surface-50 flex font-sans text-slate-800">
 
+    <x-student-aside/>
+
     <main class="flex-1 flex flex-col h-screen overflow-hidden">
 
         <header class="h-16 bg-surface-100 border-b border-surface-200 flex items-center px-8 shadow-sm">
@@ -96,7 +98,7 @@ new class extends Component {
                     </span>
                 </button>
             </div>
-                
+
             <div class="space-y-4 relative">
 
                 <div wire:loading.delay

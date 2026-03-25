@@ -36,20 +36,7 @@ new class extends Component {
 
 <div class="min-h-screen bg-surface-50 flex font-sans text-slate-800" x-data="{ sidebarOpen: false }">
 
-    <aside class="w-64 bg-surface-900 text-slate-300 flex-col hidden md:flex transition-all duration-300">
-        <div class="h-16 flex items-center px-6 border-b border-slate-700">
-            <span class="text-xl font-bold text-white tracking-wide">Lab<span class="text-accent">Sync</span></span>
-        </div>
-        <nav class="flex-1 px-4 py-6 space-y-2">
-            <a href="{{ route('student.dashboard') }}"
-               class="block px-4 py-2 bg-primary-900 text-white rounded-md font-medium" wire:navigate>Lab Equipment</a>
-            <a href="{{route('student.requests')}}"
-               class="block px-4 py-2 hover:bg-slate-800 hover:text-white rounded-md transition-colors"
-               wire:navigate>My Requests & History</a>
-            <a href="#" class="block px-4 py-2 hover:bg-slate-800 hover:text-white rounded-md transition-colors">Lab
-                Guidelines</a>
-        </nav>
-    </aside>
+    <x-student-aside/>
 
     <main class="flex-1 flex flex-col h-screen overflow-hidden">
 
@@ -69,7 +56,8 @@ new class extends Component {
 
                 <div x-show="open" x-transition.opacity style="display: none;"
                      class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 border border-surface-200 z-50">
-                    <a href="#" class="block px-4 py-2 text-sm text-slate-700 hover:bg-surface-50">Profile Settings</a>
+                    <a href="{{route('settings')}}"
+                       class="block px-4 py-2 text-sm text-slate-700 hover:bg-surface-50">Profile Settings</a>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit"

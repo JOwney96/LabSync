@@ -7,6 +7,10 @@ Route::get('/', function () {
     return redirect()->route('register');
 })->name('root');
 
+Route::livewire('/settings', 'pages::profile-edit')
+    ->middleware(['auth'])
+    ->name('settings');
+
 // REGULAR USER ROUTES
 Route::livewire('/dashboard', 'pages::student-dashboard')
     ->middleware(['auth'])
@@ -22,11 +26,11 @@ Route::livewire('/admin/dashboard', 'pages::admin-dashboard')
     ->name('admin.dashboard')
     ->middleware(['auth', 'admin']);
 
-Route::get('/admin/inventory', function () {
+/*Route::get('/admin/inventory', function () {
     return view('admin.inventory');
 })
     ->name('admin.inventory')
-    ->middleware(['auth', 'admin']);
+    ->middleware(['auth', 'admin']);*/
 
 
 // PROFILE ROUTES
