@@ -1,17 +1,51 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
+// Redirects to equipment automatically
 Route::get('/', function () {
     return redirect('/equipment');
-});
+})->name('root');
 
 Route::get('/test-db', function () {
     return DB::select('SELECT * FROM equipment');
 });
 
+// ==========================================
+// LIVEWIRE DASHBOARDS (From the Right Side)
+// ==========================================
+Route::livewire('/settings', 'pages::profile-edit')
+    ->middleware(['auth'])
+    ->name('settings');
+
+Route::livewire('/dashboard', 'pages::student-dashboard')
+    ->middleware(['auth'])
+    ->name('student.dashboard');
+
+Route::livewire('/student/requests', 'pages::student-requests')
+    ->middleware(['auth'])
+    ->name('student.requests');
+
+Route::livewire('/admin/dashboard', 'pages::admin-dashboard')
+    ->middleware(['auth', 'admin'])
+    ->name('admin.dashboard');
+
+Route::livewire('/admin/requests', 'pages::admin-requests')
+    ->middleware(['auth', 'admin'])
+    ->name('admin.requests');
+
+Route::get('/admin/equipment', function () {
+    return view('pages.admin-equipment');
+})
+    ->middleware(['auth', 'admin'])
+    ->name('admin.equipment');
+
+// ==========================================
+// EQUIPMENT SYSTEM (From the Left Side)
+// ==========================================
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/equipment', function () {
@@ -107,6 +141,7 @@ Route::middleware(['auth'])->group(function () {
         return redirect('/equipment/' . $item->equipment_id);
     });
 
+    // Spatie Security Rule!
     Route::get('/checkouts', function () {
         $rows = DB::select('
         SELECT
@@ -130,6 +165,13 @@ Route::middleware(['auth'])->group(function () {
     })->middleware('role:admin|teacher');
 });
 
-require __DIR__.'/auth.php';
+// ==========================================
+// PROFILE & AUTH ROUTES
+// ==========================================
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 
-
+require __DIR__ . '/auth.php';

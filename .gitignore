@@ -21,6 +21,7 @@ Homestead.yaml
 Homestead.json
 /.vagrant
 .phpunit.result.cache
+/database/database.*
 
 /public/build
 /storage/pail
@@ -30,3 +31,4 @@ Homestead.json
 auth.json
 
 .idea/
+package-lock.json
