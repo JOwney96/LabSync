@@ -2,24 +2,41 @@
 
 namespace Database\Seeders;
 
+use App\Models\CheckoutRequest;
+use App\Models\Equipment;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
-     * Seed the application's database.
+     * Run the database seeds.
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Create an Admin user for yourself to log in with
+        User::factory()->create([
+            'name' => 'Admin User',
+            'email' => 'admin@email.com',
+            'password' => bcrypt('password'),
+            'role' => 'admin'
+        ]);
 
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name' => 'Student User',
+            'email' => 'student@email.com',
+            'password' => bcrypt('password'),
+            'role' => 'student'
+        ]);
+
+        // Generate users and equipment
+        $users = User::factory(10)->create();
+        $equipments = Equipment::factory(50)->create();
+
+        // Create 30 random checkout requests linking the existing users and equipment
+        CheckoutRequest::factory(30)->create([
+            'user_id' => fn() => $users->random()->id,
+            'equipment_id' => fn() => $equipments->random()->id,
         ]);
     }
 }
