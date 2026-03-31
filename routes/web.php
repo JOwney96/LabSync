@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use Livewire\Volt\Volt;
 
 Route::get('/', function () {
     return redirect()->route('register');
@@ -20,6 +21,11 @@ Route::livewire('/student/requests', 'pages::student-requests')
     ->middleware(['auth'])
     ->name('student.requests');
 
+Route::livewire('/student/borrowed', 'pages::currently-borrowed')
+    ->middleware(['auth'])
+    ->name('student.borrowed');
+
+
 
 // ADMIN ONLY ROUTES
 Route::livewire('/admin/dashboard', 'pages::admin-dashboard')
@@ -35,6 +41,10 @@ Route::get('/admin/equipment', function () {
 })
     ->middleware(['auth', 'admin'])
     ->name('admin.equipment');
+
+Route::livewire('/admin/borrowed', 'pages::currently-borrowed')
+    ->middleware(['auth', 'admin'])
+    ->name('admin.borrowed');
 
 
 /*Route::get('/admin/inventory', function () {
