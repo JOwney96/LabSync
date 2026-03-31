@@ -9,8 +9,9 @@ $dashboardCss = $requestsCss = $settingsCss = $hoverColor;
 match ($pathName) {
     'student.dashboard' => $dashboardCss = $selectedColor,
     'student.requests' => $requestsCss = $selectedColor,
-    'settings' => $settingsCss = $selectedColor
-}
+    'settings' => $settingsCss = $selectedColor,
+    default => null
+};
 ?>
 
 <aside class="w-64 bg-surface-900 text-slate-300 flex-col hidden md:flex transition-all duration-300">
