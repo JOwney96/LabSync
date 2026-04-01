@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\CheckoutRequest;
+use App\Models\StudentRoutesEnum;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -56,7 +57,7 @@ new class extends Component {
 
 <div class="min-h-screen bg-surface-50 flex font-sans text-slate-800">
 
-    <x-student-aside/>
+    <x-student-aside :route="StudentRoutesEnum::REQUESTS"/>
 
     <main class="flex-1 flex flex-col h-screen overflow-hidden">
 

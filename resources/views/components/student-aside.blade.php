@@ -1,16 +1,17 @@
 <?php
-$pathName = Route::current()->getName();
+
+use App\Models\StudentRoutesEnum;
 
 $selectedColor = "bg-primary-900";
 $hoverColor = "hover:bg-slate-800";
 
 $dashboardCss = $requestsCss = $settingsCss = $hoverColor;
 
-match ($pathName) {
-    'student.dashboard' => $dashboardCss = $selectedColor,
-    'student.requests' => $requestsCss = $selectedColor,
-    'settings' => $settingsCss = $selectedColor,
-    default => null
+match ($route) {
+    StudentRoutesEnum::DASHBOARD => $dashboardCss = $selectedColor,
+    StudentRoutesEnum::REQUESTS => $requestsCss = $selectedColor,
+    StudentRoutesEnum::SETTINGS => $settingsCss = $selectedColor,
+    default => error_log("Unsupported student route passed to `student-aside`. Route: " . $route)
 };
 ?>
 

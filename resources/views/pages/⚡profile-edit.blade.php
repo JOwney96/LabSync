@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\AdminRoutesEnum;
+use App\Models\StudentRoutesEnum;
 use App\Models\User;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -15,9 +17,9 @@ new class extends Component {
 
 <div class="min-h-screen bg-surface-50 dark:bg-surface-50 flex font-sans text-slate-800">
     @if($user === "admin")
-        <x-admin-aside/>
+        <x-admin-aside :route="AdminRoutesEnum::SETTINGS"/>
     @else
-        <x-student-aside/>
+        <x-student-aside :route="StudentRoutesEnum::SETTINGS"/>
     @endif
 
     <div class="my-5 mx-auto sm:px-6 lg:px-8 space-y-6">

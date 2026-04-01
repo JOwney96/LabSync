@@ -5,6 +5,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
+use App\Models\AdminRoutesEnum;
 
 new class extends Component {
     use WithPagination;
@@ -74,7 +75,7 @@ new class extends Component {
 ?>
 
 <div class="flex bg-surface-50 min-h-screen">
-    <x-admin-aside/>
+    <x-admin-aside :route="AdminRoutesEnum::REQUESTS"/>
     <div class="p-8 max-w-7xl mx-auto w-full">
 
         <div class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-surface-200 pb-4">

@@ -1,5 +1,11 @@
+<?php
+
+use App\Models\AdminRoutesEnum;
+
+?>
+
 <div class="flex min-h-screen mx-auto bg-surface-50">
-    <x-admin-aside/>
+    <x-admin-aside :route="AdminRoutesEnum::EQUIPMENT"/>
 
     <div class="p-8 max-w-7xl mx-auto w-full">
         <div class="mb-8">
