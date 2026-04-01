@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Livewire\Volt\Volt;
 
 // Redirects to equipment automatically
 Route::get('/', function () {
@@ -15,12 +16,13 @@ Route::get('/test-db', function () {
 });
 
 // ==========================================
-// LIVEWIRE DASHBOARDS (From the Right Side)
+// LIVEWIRE DASHBOARDS
 // ==========================================
 Route::livewire('/settings', 'pages::profile-edit')
     ->middleware(['auth'])
     ->name('settings');
 
+// --- STUDENT ROUTES ---
 Route::livewire('/dashboard', 'pages::student-dashboard')
     ->middleware(['auth'])
     ->name('student.dashboard');
@@ -29,6 +31,11 @@ Route::livewire('/student/requests', 'pages::student-requests')
     ->middleware(['auth'])
     ->name('student.requests');
 
+Route::livewire('/student/borrowed', 'pages::currently-borrowed')
+    ->middleware(['auth'])
+    ->name('student.borrowed');
+
+// --- ADMIN ROUTES ---
 Route::livewire('/admin/dashboard', 'pages::admin-dashboard')
     ->middleware(['auth', 'admin'])
     ->name('admin.dashboard');
@@ -43,8 +50,12 @@ Route::get('/admin/equipment', function () {
     ->middleware(['auth', 'admin'])
     ->name('admin.equipment');
 
+Route::livewire('/admin/borrowed', 'pages::currently-borrowed')
+    ->middleware(['auth', 'admin'])
+    ->name('admin.borrowed');
+
 // ==========================================
-// EQUIPMENT SYSTEM (From the Left Side)
+// EQUIPMENT SYSTEM
 // ==========================================
 Route::middleware(['auth'])->group(function () {
 
