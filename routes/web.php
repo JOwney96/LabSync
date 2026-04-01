@@ -1,50 +1,53 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Models\AdminRoutesEnum;
+use App\Models\StudentRoutesEnum;
 use Illuminate\Support\Facades\Route;
-use Livewire\Volt\Volt;
 
 Route::get('/', function () {
     return redirect()->route('register');
 })->name('root');
 
+// All route names should come from either the `StudentRoutesEnum` or `AdminRoutesEnum` enum.
+// This will make it easier to maintain and reuse routes.
+
 Route::livewire('/settings', 'pages::profile-edit')
     ->middleware(['auth'])
-    ->name('settings');
+    ->name(StudentRoutesEnum::SETTINGS); // The name and route for settings should be the same for both admin and borrowers for reusability.
 
 // REGULAR USER ROUTES
 Route::livewire('/dashboard', 'pages::student-dashboard')
     ->middleware(['auth'])
-    ->name('student.dashboard');
+    ->name(StudentRoutesEnum::DASHBOARD->value);
 
 Route::livewire('/student/requests', 'pages::student-requests')
     ->middleware(['auth'])
-    ->name('student.requests');
+    ->name(StudentRoutesEnum::REQUESTS->value);
 
 Route::livewire('/student/borrowed', 'pages::currently-borrowed')
     ->middleware(['auth'])
-    ->name('student.borrowed');
-
+    ->name(StudentRoutesEnum::BORROWED->value);
 
 
 // ADMIN ONLY ROUTES
 Route::livewire('/admin/dashboard', 'pages::admin-dashboard')
     ->middleware(['auth', 'admin'])
-    ->name('admin.dashboard');
+    ->name(AdminRoutesEnum::DASHBOARD->value);
 
 Route::livewire('/admin/requests', 'pages::admin-requests')
     ->middleware(['auth', 'admin'])
-    ->name('admin.requests');
+    ->name(AdminRoutesEnum::REQUESTS->value);
 
 Route::get('/admin/equipment', function () {
     return view('pages.admin-equipment');
 })
     ->middleware(['auth', 'admin'])
-    ->name('admin.equipment');
+    ->name(AdminRoutesEnum::EQUIPMENT->value);
 
 Route::livewire('/admin/borrowed', 'pages::currently-borrowed')
     ->middleware(['auth', 'admin'])
-    ->name('admin.borrowed');
+    ->name(AdminRoutesEnum::BORROWED->value);
 
 
 /*Route::get('/admin/inventory', function () {
