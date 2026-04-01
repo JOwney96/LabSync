@@ -73,7 +73,9 @@ new class extends Component {
                 <option value="">All Statuses</option>
                 <option value="available">Available</option>
                 <option value="in_use">In Use</option>
-                <option value="maintenance">Maintenance</option>
+                @if($isAdmin)
+                    <option value="maintenance">Maintenance</option>
+                @endif
             </select>
 
             @if($isAdmin)
