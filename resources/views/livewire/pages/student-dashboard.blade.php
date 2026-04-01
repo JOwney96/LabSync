@@ -1,13 +1,18 @@
 <?php
 
 use App\Models\CheckoutRequest;
+use App\Models\Equipment;
 use Livewire\Attributes\Computed;
-use Livewire\Attributes\Layout;
-use Livewire\Component;
+use Livewire\Attributes\On;
+use Livewire\Volt\Component;
 
 new class extends Component {
 
-    // We use Computed properties to grab the student's specific stats efficiently
+    #[On('bulk-checkout-complete')]
+    public function refreshStats()
+    {
+    }
+
     #[Computed]
     public function activeItemsCount()
     {
@@ -71,6 +76,7 @@ new class extends Component {
 
         <div class="flex-1 overflow-y-auto p-8">
 
+            {{-- Stats Cards Section --}}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div class="bg-surface-100 p-6 rounded-lg border border-surface-200 shadow-soft">
                     <h3 class="text-sm font-medium text-slate-500 mb-1">Currently Borrowed</h3>
@@ -114,12 +120,15 @@ new class extends Component {
                     <p class="text-sm text-slate-500">Search and request equipment for your experiments.</p>
                 </div>
 
+                {{-- The main equipment table component --}}
                 <livewire:equipment-table/>
             </section>
 
         </div>
     </main>
 
+    {{-- MODALS SECTION --}}
     <livewire:checkout-modal/>
+    <livewire:bulk-checkout-modal />
 
 </div>

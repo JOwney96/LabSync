@@ -26,31 +26,48 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            // We remove 'role' from validation because we determine it ourselves now
+            'role' => ['required', 'in:student,faculty,admin'],
+            'faculty_code' => ['nullable', 'string'],
             'admin_code' => ['nullable', 'string'],
         ]);
 
-        /** * ROLE LOGIC:
-         * If they type the secret code, they become an admin.
-         * Otherwise, they are automatically a student.
+        /** * ROLE LOGIC & CODE VERIFICATION
          */
-        $role = ($request->admin_code === 'TAMUT-ADMIN-2026') ? 'admin' : 'student';
+        $selectedRole = $request->role;
 
+        // Verify Faculty Code
+        if ($selectedRole === 'faculty' && $request->faculty_code !== 'FAC-2026') {
+            throw ValidationException::withMessages([
+                'faculty_code' => 'The provided faculty access code is incorrect.',
+            ]);
+        }
+
+        // Verify Admin Code
+        if ($selectedRole === 'admin' && $request->admin_code !== 'TAMUT-ADMIN-2026') {
+            throw ValidationException::withMessages([
+                'admin_code' => 'The provided admin access code is incorrect.',
+            ]);
+        }
+
+        // Create the User
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $role,
         ]);
+
+        /**
+         * SPATIE ASSIGNMENT
+         * This links the user to the permissions system so your Blade tags work!
+         */
+        $user->assignRole($selectedRole);
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        $route = 'student.dashboard';
-        if ($user->role == 'admin') {
-            $route = 'admin.dashboard';
-        }
+
+        $route = ($selectedRole === 'admin') ? 'admin.dashboard' : 'student.dashboard';
 
         return redirect(route($route, absolute: false));
     }

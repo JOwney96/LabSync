@@ -15,6 +15,7 @@ class CheckoutRequest extends Model
         'equipment_id',
         'start_date',
         'end_date',
+        'request_date',
         'purpose',
         'status',
         'admin_notes',

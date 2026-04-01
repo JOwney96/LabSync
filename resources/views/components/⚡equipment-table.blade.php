@@ -2,6 +2,7 @@
 
 use App\Models\Equipment;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -11,6 +12,26 @@ new class extends Component {
     public bool $isAdmin = false;
     public string $search = '';
     public string $statusFilter = '';
+
+    public array $selectedEquipment = [];
+
+    /**
+     * Listener to clear checkboxes and refresh the list
+     * once the bulk checkout is confirmed in the modal.
+     */
+    #[On('bulk-checkout-complete')]
+    public function resetSelection()
+    {
+        $this->selectedEquipment = [];
+        $this->resetPage();
+    }
+
+    public function triggerBulkCheckout() {
+        if(empty($this->selectedEquipment)) {
+            return;
+        }
+        $this->dispatch('open-bulk-checkout-modal', selectedIds: $this->selectedEquipment);
+    }
 
     // Automatically called by Livewire when $search or $statusFilter changes
     public function updatedSearch()
@@ -39,11 +60,17 @@ new class extends Component {
         $this->dispatch('open-checkout-modal', equipmentId: $equipmentId);
     }
 
-    // The #[Computed] attribute elegantly handles passing data to the view
     #[Computed]
     public function equipments()
     {
         return Equipment::query()
+            ->when($this->search, function($query) {
+                $query->where('name', 'like', '%' . $this->search . '%')
+                    ->orWhere('tag_id', 'like', '%' . $this->search . '%');
+            })
+            ->when($this->statusFilter, function($query) {
+                $query->where('status', $this->statusFilter);
+            })
             ->orderBy('name')
             ->paginate(10);
     }
@@ -78,6 +105,16 @@ new class extends Component {
                 @endif
             </select>
 
+            {{-- 1. Updated role check to include 'teacher' for the button --}}
+            @hasanyrole('admin|faculty|teacher')
+            @if(count($selectedEquipment) > 0)
+                <button wire:click="triggerBulkCheckout"
+                        class="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md shadow-sm transition-colors">
+                    Bulk Request ({{ count($selectedEquipment) }})
+                </button>
+            @endif
+            @endhasanyrole
+
             @if($isAdmin)
                 <button
                     class="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md shadow-sm transition-colors">
@@ -103,6 +140,10 @@ new class extends Component {
         <table class="w-full text-left border-collapse">
             <thead>
             <tr class="bg-surface-50 border-b border-surface-200 text-xs uppercase tracking-wider text-slate-500 font-semibold">
+                {{-- 2. Updated role check here so the checkbox column header shows for Faculty/Teachers --}}
+                @hasanyrole('admin|faculty|teacher')
+                <th class="p-4 w-12"></th>
+                @endhasanyrole
                 <th class="p-4">Equipment & ID</th>
                 <th class="p-4">Category</th>
                 <th class="p-4">Status</th>
@@ -116,6 +157,15 @@ new class extends Component {
             @forelse ($this->equipments as $item)
                 <tr wire:key="equipment-{{ $item->id }}" class="hover:bg-surface-50 transition-colors">
 
+                    {{-- 3. Updated role check here so the actual checkboxes show for Faculty/Teachers --}}
+                    @hasanyrole('admin|faculty|teacher')
+                    <td class="p-4 w-12">
+                        <input type="checkbox" wire:model.live="selectedEquipment" value="{{ $item->id }}"
+                               @disabled($item->status !== 'available')
+                               class="rounded border-slate-300 text-primary-600 focus:ring-primary-500 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed">
+                    </td>
+                    @endhasanyrole
+
                     <td class="p-4">
                         <div class="font-medium text-slate-800">{{ $item->name }}</div>
                         <div class="text-xs font-mono text-slate-500">{{ $item->tag_id }}</div>
@@ -125,17 +175,13 @@ new class extends Component {
 
                     <td class="p-4">
                         @if($item->status === 'available')
-                            <span
-                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-status-success/10 text-status-success">Available</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-status-success/10 text-status-success">Available</span>
                         @elseif($item->status === 'in_use')
-                            <span
-                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-700">In Use</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-700">In Use</span>
                         @elseif($item->status === 'maintenance')
-                            <span
-                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-status-error/10 text-status-error">Maintenance</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-status-error/10 text-status-error">Maintenance</span>
                         @else
-                            <span
-                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">{{ ucfirst($item->status) }}</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">{{ ucfirst($item->status) }}</span>
                         @endif
                     </td>
 
@@ -147,18 +193,17 @@ new class extends Component {
 
                     <td class="p-4 text-right">
                         @if($isAdmin)
+                            {{-- Admin Menu logic --}}
                             <div x-data="{ menuOpen: false }" class="relative inline-block text-left">
                                 <button @click="menuOpen = !menuOpen" @click.away="menuOpen = false"
                                         class="text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-surface-200 transition-colors">
                                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                        <path
-                                            d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
+                                        <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
                                     </svg>
                                 </button>
                                 <div x-show="menuOpen" x-transition x-cloak
                                      class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-surface-200 z-50 overflow-hidden">
-                                    <a href="#" class="block px-4 py-2 text-sm text-slate-700 hover:bg-surface-50">Edit
-                                        Details</a>
+                                    <a href="#" class="block px-4 py-2 text-sm text-slate-700 hover:bg-surface-50">Edit Details</a>
 
                                     <button
                                         wire:click="toggleMaintenance({{ $item->id }})"
@@ -182,7 +227,7 @@ new class extends Component {
                 </tr>
             @empty
                 <tr>
-                    <td colspan="{{ $isAdmin ? '5' : '4' }}" class="p-8 text-center text-slate-500">
+                    <td colspan="100%" class="p-8 text-center text-slate-500">
                         No equipment found matching your criteria.
                     </td>
                 </tr>

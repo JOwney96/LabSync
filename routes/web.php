@@ -16,168 +16,115 @@ Route::get('/test-db', function () {
 });
 
 // ==========================================
-// LIVEWIRE DASHBOARDS
+// DASHBOARDS & PAGES (Volt Routes)
 // ==========================================
-Route::livewire('/settings', 'pages::profile-edit')
-    ->middleware(['auth'])
-    ->name('settings');
 
-// --- STUDENT ROUTES ---
-Route::livewire('/dashboard', 'pages::student-dashboard')
-    ->middleware(['auth'])
-    ->name('student.dashboard');
+Route::middleware(['auth'])->group(function () {
 
-Route::livewire('/student/requests', 'pages::student-requests')
-    ->middleware(['auth'])
-    ->name('student.requests');
+    // --- SETTINGS ---
+    Route::get('/settings', function () {
+        return view('pages.profile-edit');
+    })->name('settings');
 
-Route::livewire('/student/borrowed', 'pages::currently-borrowed')
-    ->middleware(['auth'])
-    ->name('student.borrowed');
+    // --- STUDENT/FACULTY ROUTES ---
+    Volt::route('/dashboard', 'pages.student-dashboard')
+        ->name('student.dashboard');
+
+    Volt::route('/student/requests', 'pages.student-requests')
+        ->name('student.requests');
+
+    Volt::route('/student/borrowed', 'pages.student-borrowed')
+        ->name('student.borrowed');
+});
 
 // --- ADMIN ROUTES ---
-Route::livewire('/admin/dashboard', 'pages::admin-dashboard')
-    ->middleware(['auth', 'admin'])
-    ->name('admin.dashboard');
+Route::middleware(['auth', 'role:admin'])->group(function () {
 
-Route::livewire('/admin/requests', 'pages::admin-requests')
-    ->middleware(['auth', 'admin'])
-    ->name('admin.requests');
+    Volt::route('/admin/dashboard', 'pages.admin-dashboard')
+        ->name('admin.dashboard');
 
-Route::get('/admin/equipment', function () {
-    return view('pages.admin-equipment');
-})
-    ->middleware(['auth', 'admin'])
-    ->name('admin.equipment');
+    Volt::route('/admin/requests', 'pages.admin-requests')
+        ->name('admin.requests');
 
-Route::livewire('/admin/borrowed', 'pages::currently-borrowed')
-    ->middleware(['auth', 'admin'])
+    Route::get('/admin/equipment', function () {
+        return view('pages.admin-equipment');
+    })->name('admin.equipment');
+
+    Volt::route('/admin/borrowed', 'pages.student-borrowed') // Reusing the borrowed component
     ->name('admin.borrowed');
+});
 
 // ==========================================
-// EQUIPMENT SYSTEM
+// EQUIPMENT SYSTEM (Traditional Routes)
 // ==========================================
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/equipment', function () {
         $items = DB::select("
-        SELECT
-            e.*,
-            (
-                SELECT COUNT(*)
-                FROM equipment_items ei
-                WHERE ei.equipment_id = e.id
-                AND ei.status = 'Available'
-            ) AS available_count
-        FROM equipment e
-        ORDER BY e.name
-    ");
-
-        return view('equipment.index', [
-            'title' => 'Equipment List',
-            'items' => $items,
-        ]);
+            SELECT e.*,
+                (SELECT COUNT(*) FROM equipment_items ei
+                 WHERE ei.equipment_id = e.id AND ei.status = 'Available') AS available_count
+            FROM equipment e ORDER BY e.name
+        ");
+        return view('equipment.index', ['title' => 'Equipment List', 'items' => $items]);
     });
 
     Route::get('/equipment/{id}', function ($id) {
         $equipment = DB::selectOne('SELECT * FROM equipment WHERE id = ?', [$id]);
-
-        if (!$equipment) {
-            abort(404);
-        }
+        if (!$equipment) abort(404);
 
         $items = DB::select("
-        SELECT
-            ei.*,
-            c.user_name AS checkout_user_name,
-            c.checkout_date
-        FROM equipment_items ei
-        LEFT JOIN checkouts c
-            ON ei.id = c.equipment_item_id
-            AND c.status = 'Checked Out'
-        WHERE ei.equipment_id = ?
-        ORDER BY ei.id
-    ", [$id]);
+            SELECT ei.*, c.user_name AS checkout_user_name, c.checkout_date
+            FROM equipment_items ei
+            LEFT JOIN checkouts c ON ei.id = c.equipment_item_id AND c.status = 'Checked Out'
+            WHERE ei.equipment_id = ? ORDER BY ei.id
+        ", [$id]);
 
-        return view('equipment.show', [
-            'title' => $equipment->name,
-            'equipment' => $equipment,
-            'items' => $items,
-        ]);
+        return view('equipment.show', ['title' => $equipment->name, 'equipment' => $equipment, 'items' => $items]);
     });
 
     Route::post('/checkout-item/{id}', function (Request $request, $id) {
         $item = DB::selectOne('SELECT * FROM equipment_items WHERE id = ?', [$id]);
-
-        if (!$item || $item->status !== 'Available') {
-            return 'Item is not available.';
-        }
-
-        $userName = auth()->user()->name;
+        if (!$item || $item->status !== 'Available') return 'Item is not available.';
 
         DB::table('checkouts')->insert([
             'equipment_item_id' => $id,
-            'user_name' => $userName,
+            'user_name' => auth()->user()->name,
             'checkout_date' => now(),
-            'return_date' => null,
             'status' => 'Checked Out',
         ]);
 
-        DB::table('equipment_items')
-            ->where('id', $id)
-            ->update(['status' => 'Checked Out']);
-
+        DB::table('equipment_items')->where('id', $id)->update(['status' => 'Checked Out']);
         return redirect('/equipment/' . $item->equipment_id);
     });
 
     Route::post('/return-item/{id}', function ($id) {
         $item = DB::selectOne('SELECT * FROM equipment_items WHERE id = ?', [$id]);
+        if (!$item) return 'Item not found.';
 
-        if (!$item) {
-            return 'Item not found.';
-        }
-
-        DB::table('equipment_items')
-            ->where('id', $id)
-            ->update(['status' => 'Available']);
-
-        DB::table('checkouts')
-            ->where('equipment_item_id', $id)
-            ->where('status', 'Checked Out')
-            ->update([
-                'status' => 'Returned',
-                'return_date' => now(),
-            ]);
+        DB::table('equipment_items')->where('id', $id)->update(['status' => 'Available']);
+        DB::table('checkouts')->where('equipment_item_id', $id)->where('status', 'Checked Out')
+            ->update(['status' => 'Returned', 'return_date' => now()]);
 
         return redirect('/equipment/' . $item->equipment_id);
     });
 
-    // Spatie Security Rule!
+    // History access for Admin and Faculty
     Route::get('/checkouts', function () {
         $rows = DB::select('
-        SELECT
-            c.id,
-            c.user_name,
-            c.checkout_date,
-            c.return_date,
-            c.status,
-            e.name AS equipment_name,
-            i.serial_number
-        FROM checkouts c
-        JOIN equipment_items i ON c.equipment_item_id = i.id
-        JOIN equipment e ON i.equipment_id = e.id
-        ORDER BY c.id DESC
-    ');
-
-        return view('checkouts.index', [
-            'title' => 'Checkout History',
-            'rows' => $rows,
-        ]);
-    })->middleware('role:admin|teacher');
+            SELECT c.id, c.user_name, c.checkout_date, c.return_date, c.status,
+                   e.name AS equipment_name, i.serial_number
+            FROM checkouts c
+            JOIN equipment_items i ON c.equipment_item_id = i.id
+            JOIN equipment e ON i.equipment_id = e.id
+            ORDER BY c.id DESC
+        ');
+        return view('checkouts.index', ['title' => 'Checkout History', 'rows' => $rows]);
+    })->middleware('role:admin|faculty');
 });
 
 // ==========================================
-// PROFILE & AUTH ROUTES
+// PROFILE & AUTH
 // ==========================================
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
