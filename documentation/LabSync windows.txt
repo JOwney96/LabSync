@@ -16,14 +16,14 @@ Install Prerequisites:
 		- unix and macOS:https://github.com/nvm-sh/nvm
 			- nvm install --lts
 			- nvm use --lts
-			
+
 Clone project:
 	- Open termial
 	- cd to where we will store the project
 		- Windows Phpstorm: C:\Users\"your username"\PhpstormProjects
 		- Linux Phpstorm: ~/"your username"/PhpstormProjects
 	- git clone https://github.com/JOwney96/LabSync
-	
+
 Configure php extenstions
 	- php --ini
 		- Loaded Configuration File: "'your path here'\php.ini"
@@ -33,7 +33,7 @@ Configure php extenstions
 			- extension=pdo_sqlite
 			- extension=sqlite3
 			- extension=pdo_mysql <- this is optional
-			
+
 Initialize the project
 	- In the termial cd to the project's root.
 		- cd "where you cloned the project"\LabSync
@@ -48,13 +48,13 @@ Initialize the project
 	- Go to that link and confirm it works
 		- Will get a laravel "let's get started" page
 	- Close the server
-	
+
 Set up Phpstorm:
 	- Open project in phpstorm
 	- Open the composer.json file
 	- Find the line that has "dev" on it
 	- Find and click the play button on the left of that line.
 	- Same should happen above where the server is running and you get the laravel page.
-	
+
 Relax
 	- We are done

@@ -44,6 +44,15 @@ new class extends Component {
     public function equipments()
     {
         return Equipment::query()
+            ->when($this->search, function ($query) {
+                $query->where(function ($q) {
+                    $q->where('name', 'like', '%' . $this->search . '%')
+                        ->orWhere('tag_id', 'like', '%' . $this->search . '%');
+                });
+            })
+            ->when($this->statusFilter, function ($query) {
+                $query->where('status', $this->statusFilter);
+            })
             ->orderBy('name')
             ->paginate(10);
     }
