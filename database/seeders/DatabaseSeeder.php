@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\AdminWhitelist;
 use App\Models\CheckoutRequest;
 use App\Models\Equipment;
 use App\Models\User;
@@ -14,6 +15,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Pre-approve the seed admin email on the whitelist
+        AdminWhitelist::create([
+            'email' => 'admin@email.com',
+            'notes' => 'Seed admin account',
+        ]);
+
         // Create an Admin user for yourself to log in with
         User::factory()->create([
             'name' => 'Admin User',
