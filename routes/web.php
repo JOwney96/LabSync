@@ -43,6 +43,10 @@ Route::get('/admin/equipment', function () {
     ->middleware(['auth', 'admin'])
     ->name('admin.equipment');
 
+Route::livewire('/admin/whitelist', 'pages::admin-whitelist')
+    ->middleware(['auth', 'admin'])
+    ->name('admin.whitelist');
+
 // ==========================================
 // EQUIPMENT SYSTEM (From the Left Side)
 // ==========================================
