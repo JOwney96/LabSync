@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\AdminWhitelist;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -30,11 +31,14 @@ class RegisteredUserController extends Controller
             'admin_code' => ['nullable', 'string'],
         ]);
 
-        /** * ROLE LOGIC:
-         * If they type the secret code, they become an admin.
-         * Otherwise, they are automatically a student.
+        /**
+         * ROLE LOGIC (two paths to admin):
+         * 1. Email is on the admin whitelist (pre-approved by an existing admin).
+         * 2. They supply the secret registration code as a fallback.
+         * Otherwise, the user is registered as a student.
          */
-        $role = ($request->admin_code === 'TAMUT-ADMIN-2026') ? 'admin' : 'student';
+        $isWhitelisted = AdminWhitelist::where('email', $request->email)->exists();
+        $role = ($isWhitelisted || $request->admin_code === 'TAMUT-ADMIN-2026') ? 'admin' : 'student';
 
         $user = User::create([
             'name' => $request->name,
