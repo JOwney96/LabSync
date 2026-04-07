@@ -4,13 +4,14 @@ $pathName = Route::current()->getName();
 $selectedColor = "bg-primary-900 text-white";
 $hoverColor = "hover:bg-slate-800 hover:text-white";
 
-$dashboardCss = $equipmentCss = $requestsCss = $settingsCss = $hoverColor;
+$dashboardCss = $equipmentCss = $requestsCss = $whitelistCss = $settingsCss = $hoverColor;
 
 match ($pathName) {
-    'admin.dashboard' => $dashboardCss = $selectedColor,
-    'admin.equipment' => $equipmentCss = $selectedColor,
-    'admin.requests' => $requestsCss = $selectedColor,
-    'settings' => $settingsCss = $selectedColor
+    'admin.dashboard'  => $dashboardCss  = $selectedColor,
+    'admin.equipment'  => $equipmentCss  = $selectedColor,
+    'admin.requests'   => $requestsCss   = $selectedColor,
+    'admin.whitelist'  => $whitelistCss  = $selectedColor,
+    'settings'         => $settingsCss   = $selectedColor
 }
 ?>
 
@@ -26,6 +27,9 @@ match ($pathName) {
            wire:navigate>Equipment</a>
         <a href="{{route('admin.requests')}}"
            class="block px-4 py-2 rounded-md transition-colors {{$requestsCss}}">Requests</a>
+        <a href="{{ route('admin.whitelist') }}"
+           class="block px-4 py-2 rounded-md transition-colors {{$whitelistCss}}"
+           wire:navigate>Whitelist</a>
         <a href="{{route('settings')}}"
            class="block px-4 py-2 rounded-md transition-colors {{$settingsCss}}">Settings</a>
     </nav>
