@@ -11,7 +11,8 @@ match ($pathName) {
     'admin.equipment'  => $equipmentCss  = $selectedColor,
     'admin.requests'   => $requestsCss   = $selectedColor,
     'admin.whitelist'  => $whitelistCss  = $selectedColor,
-    'settings'         => $settingsCss   = $selectedColor
+    'settings'         => $settingsCss   = $selectedColor,
+    default            => null,
 }
 ?>
 
