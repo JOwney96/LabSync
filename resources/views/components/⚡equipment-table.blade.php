@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Equipment;
+use App\Models\CheckoutRequest;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -56,6 +57,7 @@ new class extends Component {
             ->orderBy('name')
             ->paginate(10);
     }
+
 };
 ?>
 
@@ -83,6 +85,7 @@ new class extends Component {
                 <option value="available">Available</option>
                 <option value="in_use">In Use</option>
                 <option value="maintenance">Maintenance</option>
+                <option value="retired">Retired</option>
             </select>
 
             @if($isAdmin)
