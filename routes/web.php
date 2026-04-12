@@ -29,7 +29,6 @@ Route::livewire('/student/borrowed', 'pages::currently-borrowed')
     ->middleware(['auth'])
     ->name(StudentRoutesEnum::BORROWED->value);
 
-
 // ADMIN ONLY ROUTES
 Route::livewire('/admin/dashboard', 'pages::admin-dashboard')
     ->middleware(['auth', 'admin'])
