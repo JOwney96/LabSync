@@ -39,9 +39,7 @@ Route::livewire('/admin/requests', 'pages::admin-requests')
     ->middleware(['auth', 'admin'])
     ->name(AdminRoutesEnum::REQUESTS->value);
 
-Route::get('/admin/equipment', function () {
-    return view('pages.admin-equipment');
-})
+Route::livewire('/admin/equipment', 'pages::admin-equipment')
     ->middleware(['auth', 'admin'])
     ->name(AdminRoutesEnum::EQUIPMENT->value);
 

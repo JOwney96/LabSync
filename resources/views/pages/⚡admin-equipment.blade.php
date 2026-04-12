@@ -1,6 +1,11 @@
 <?php
 
 use App\Models\AdminRoutesEnum;
+use Livewire\Component;
+
+new class extends Component {
+    //
+}
 
 ?>
 
