@@ -1,50 +1,50 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Models\AdminRoutesEnum;
-use App\Models\StudentRoutesEnum;
 use Illuminate\Support\Facades\Route;
+use Livewire\Volt\Volt;
 
 Route::get('/', function () {
     return redirect()->route('register');
 })->name('root');
 
-// All route names should come from either the `StudentRoutesEnum` or `AdminRoutesEnum` enum.
-// This will make it easier to maintain and reuse routes.
-
 Route::livewire('/settings', 'pages::profile-edit')
     ->middleware(['auth'])
-    ->name(StudentRoutesEnum::SETTINGS->value); // The name and route for settings should be the same for both admin and borrowers for reusability.
+    ->name('settings');
 
 // REGULAR USER ROUTES
 Route::livewire('/dashboard', 'pages::student-dashboard')
     ->middleware(['auth'])
-    ->name(StudentRoutesEnum::DASHBOARD->value);
+    ->name('student.dashboard');
 
 Route::livewire('/student/requests', 'pages::student-requests')
     ->middleware(['auth'])
-    ->name(StudentRoutesEnum::REQUESTS->value);
+    ->name('student.requests');
 
 Route::livewire('/student/borrowed', 'pages::currently-borrowed')
     ->middleware(['auth'])
-    ->name(StudentRoutesEnum::BORROWED->value);
+    ->name('student.borrowed');
+
+
 
 // ADMIN ONLY ROUTES
 Route::livewire('/admin/dashboard', 'pages::admin-dashboard')
     ->middleware(['auth', 'admin'])
-    ->name(AdminRoutesEnum::DASHBOARD->value);
+    ->name('admin.dashboard');
 
 Route::livewire('/admin/requests', 'pages::admin-requests')
     ->middleware(['auth', 'admin'])
-    ->name(AdminRoutesEnum::REQUESTS->value);
+    ->name('admin.requests');
 
-Route::livewire('/admin/equipment', 'pages::admin-equipment')
+Route::get('/admin/equipment', function () {
+    return view('pages.admin-equipment');
+})
     ->middleware(['auth', 'admin'])
-    ->name(AdminRoutesEnum::EQUIPMENT->value);
+    ->name('admin.equipment');
 
 Route::livewire('/admin/borrowed', 'pages::currently-borrowed')
     ->middleware(['auth', 'admin'])
-    ->name(AdminRoutesEnum::BORROWED->value);
+    ->name('admin.borrowed');
 
 
 /*Route::get('/admin/inventory', function () {

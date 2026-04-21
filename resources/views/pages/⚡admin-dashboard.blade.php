@@ -1,14 +1,27 @@
 <?php
 
+use App\Models\AdminRoutesEnum;
+use App\Models\CheckoutRequest;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Collection;
 use Livewire\Component;
 use Livewire\Features\SupportRedirects\Redirector;
 
 new class extends Component {
     //
     public int $pendingRequestsCount = 0;
-    public array $pendingRequests = [];
+    public Collection $pendingRequests;
     public string $searchQuery = '';
+
+    public function mount()
+    {
+        $this->pendingRequests = CheckoutRequest::with(['user', 'equipment'])
+            ->where('status', 'pending')
+            ->latest()
+            ->get();
+
+        $this->pendingRequestsCount = $this->pendingRequests->count();
+    }
 
     public function logout(): void
     {
@@ -22,7 +35,7 @@ new class extends Component {
 
 <div class="min-h-screen bg-surface-50 flex font-sans text-slate-800" x-data="{ sidebarOpen: false }">
 
-    <x-admin-aside/>
+    <x-admin-aside :route="AdminRoutesEnum::DASHBOARD"/>
 
     <main class="flex-1 flex flex-col h-screen overflow-hidden">
 

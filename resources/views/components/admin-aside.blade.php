@@ -1,16 +1,18 @@
 <?php
-$pathName = Route::current()->getName();
+
+use App\Models\AdminRoutesEnum;
 
 $selectedColor = "bg-primary-900 text-white";
 $hoverColor = "hover:bg-slate-800 hover:text-white";
 
 $dashboardCss = $equipmentCss = $requestsCss = $settingsCss = $hoverColor;
 
-match ($pathName) {
-    'admin.dashboard' => $dashboardCss = $selectedColor,
-    'admin.equipment' => $equipmentCss = $selectedColor,
-    'admin.requests' => $requestsCss = $selectedColor,
-    'settings' => $settingsCss = $selectedColor
+match ($route) {
+    AdminRoutesEnum::DASHBOARD => $dashboardCss = $selectedColor,
+    AdminRoutesEnum::EQUIPMENT => $equipmentCss = $selectedColor,
+    AdminRoutesEnum::REQUESTS => $requestsCss = $selectedColor,
+    AdminRoutesEnum::SETTINGS => $settingsCss = $selectedColor,
+    default => error_log("Unsupported admin route passed to `admin-aside`. Route: " . $route)
 }
 ?>
 
