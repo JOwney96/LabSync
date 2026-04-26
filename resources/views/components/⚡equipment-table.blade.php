@@ -181,6 +181,7 @@ new class extends Component {
                             </div>
                         @else
                             <button
+                                dusk="select-equipment-{{ $item->id }}"
                                 wire:click="initiateCheckout({{ $item->id }})"
                                 @disabled($item->status !== 'available')
                                 class="px-3 py-1.5 text-sm font-medium rounded transition-colors data-[loading]:opacity-50 disabled:opacity-50 disabled:cursor-not-allowed

@@ -48,6 +48,7 @@ new class extends Component {
 ?>
 
 <div
+    dusk="checkout-modal"
     x-data="{ show: @entangle('isOpen') }"
     x-show="show"
     x-cloak
@@ -84,7 +85,7 @@ new class extends Component {
                                         <div>
                                             <label for="start_date" class="block text-sm font-medium text-slate-700">Start
                                                 Date</label>
-                                            <input type="date" wire:model="start_date" id="start_date"
+                                            <input dusk="start-date" type="date" wire:model="start_date" id="start_date"
                                                    class="mt-1 block w-full rounded-md border-surface-200 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm bg-surface-50 p-2 border">
                                             @error('start_date') <span
                                                 class="text-xs text-status-error mt-1">{{ $message }}</span> @enderror
@@ -93,7 +94,7 @@ new class extends Component {
                                         <div>
                                             <label for="end_date" class="block text-sm font-medium text-slate-700">End
                                                 Date</label>
-                                            <input type="date" wire:model="end_date" id="end_date"
+                                            <input dusk="end-date" type="date" wire:model="end_date" id="end_date"
                                                    class="mt-1 block w-full rounded-md border-surface-200 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm bg-surface-50 p-2 border">
                                             @error('end_date') <span
                                                 class="text-xs text-status-error mt-1">{{ $message }}</span> @enderror
@@ -103,7 +104,7 @@ new class extends Component {
                                     <div>
                                         <label for="purpose" class="block text-sm font-medium text-slate-700">Purpose of
                                             Checkout</label>
-                                        <textarea wire:model="purpose" id="purpose" rows="3"
+                                        <textarea dusk="purpose" wire:model="purpose" id="purpose" rows="3"
                                                   class="mt-1 block w-full rounded-md border-surface-200 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm bg-surface-50 p-2 border"
                                                   placeholder="Briefly describe what experiment or project this is for..."></textarea>
                                         @error('purpose') <span
@@ -117,6 +118,7 @@ new class extends Component {
                     <div
                         class="bg-surface-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 border-t border-surface-200">
                         <button
+                            dusk="submit-request"
                             type="button"
                             wire:click="submitRequest"
                             class="inline-flex w-full justify-center rounded-md bg-primary-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-500 sm:ml-3 sm:w-auto data-[loading]:opacity-50 transition-colors"
