@@ -23,6 +23,25 @@ new class extends Component {
         $this->pendingRequestsCount = $this->pendingRequests->count();
     }
 
+    public function approveRequest(int $requestId): void
+    {
+        $request = CheckoutRequest::findOrFail($requestId);
+        $request->update(['status' => 'approved']);
+        $request->equipment->update(['status' => 'in_use']);
+
+        $this->pendingRequests = $this->pendingRequests->reject(fn($r) => $r->id === $requestId);
+        $this->pendingRequestsCount = $this->pendingRequests->count();
+    }
+
+    public function denyRequest(int $requestId): void
+    {
+        $request = CheckoutRequest::findOrFail($requestId);
+        $request->update(['status' => 'denied']);
+
+        $this->pendingRequests = $this->pendingRequests->reject(fn($r) => $r->id === $requestId);
+        $this->pendingRequestsCount = $this->pendingRequests->count();
+    }
+
     public function logout(): void
     {
         auth()->logout();
@@ -136,4 +155,5 @@ new class extends Component {
 
         </div>
     </main>
+    <livewire:equipment-modal />
 </div>

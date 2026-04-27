@@ -3,6 +3,7 @@
 use App\Models\Equipment;
 use App\Models\CheckoutRequest;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -38,6 +39,19 @@ new class extends Component {
     public function initiateCheckout($equipmentId)
     {
         $this->dispatch('open-checkout-modal', equipmentId: $equipmentId);
+    }
+
+    public function addEquipment(): void
+    {
+        $this->dispatch('open-equipment-modal');
+    }
+
+    #[On('equipment-saved')]
+    public function refreshTable(): void
+    {
+        // The #[Computed] property re-runs automatically,
+        // but flash the page for good UX
+        session()->flash('message', 'Equipment list updated.');
     }
 
     // The #[Computed] attribute elegantly handles passing data to the view
@@ -89,8 +103,8 @@ new class extends Component {
             </select>
 
             @if($isAdmin)
-                <button
-                    class="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md shadow-sm transition-colors">
+                <button wire:click="addEquipment"
+                        class="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md shadow-sm transition-colors">
                     + Add Equipment
                 </button>
             @endif
@@ -167,8 +181,12 @@ new class extends Component {
                                 </button>
                                 <div x-show="menuOpen" x-transition x-cloak
                                      class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-surface-200 z-50 overflow-hidden">
-                                    <a href="#" class="block px-4 py-2 text-sm text-slate-700 hover:bg-surface-50">Edit
-                                        Details</a>
+                                    <button
+                                        wire:click="$dispatch('open-equipment-modal', { equipmentId: {{ $item->id }} })"
+                                        @click="menuOpen = false"
+                                        class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-surface-50">
+                                        Edit Details
+                                    </button>
 
                                     <button
                                         wire:click="toggleMaintenance({{ $item->id }})"
