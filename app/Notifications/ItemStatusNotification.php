@@ -3,8 +3,8 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
 
 class ItemStatusNotification extends Notification
 {
@@ -12,11 +12,15 @@ class ItemStatusNotification extends Notification
 
     protected $equipment;
     protected $type;
+//    protected $item;
+//    protected $reason;
 
-    public function __construct($equipment, $type)
+    public function __construct($equipment, $type /*$item, $reason*/)
     {
         $this->equipment = $equipment;
         $this->type = $type;
+//        $this->item = $item;
+//        $this->reason = $reason;
     }
 
     public function via($notifiable)
@@ -28,46 +32,26 @@ class ItemStatusNotification extends Notification
     {
         $equipmentName = $this->equipment->name ?? 'your item';
 
-        switch ($this->type) {
-            case 'due_week':
-                return (new MailMessage)
-                    ->subject('Reminder: Item Due in 7 Days')
-                    ->line("The item '{$equipmentName}' is due in 7 days.")
-                    ->line('Please return it on time.');
-
-            case 'due_today':
-                return (new MailMessage)
-                    ->subject('Reminder: Item Due Today')
-                    ->line("The item '{$equipmentName}' is due today.")
-                    ->line('Please return it as soon as possible.');
-
-            case 'overdue':
-                return (new MailMessage)
-                    ->subject('Overdue Item Notice')
-                    ->line("The item '{$equipmentName}' is overdue.")
-                    ->line('Please return it immediately.');
-
-            default:
-                return (new MailMessage)
-                    ->subject('Item Update')
-                    ->line("Update regarding '{$equipmentName}'.");
-        }
-    protected $item;
-    protected $reason;
-
-    public function __construct($item, string $reason)
-    {
-        $this->item = $item;
-        $this->reason = $reason;
+        return match ($this->type) {
+            'due_week' => (new MailMessage)
+                ->subject('Reminder: Item Due in 7 Days')
+                ->line("The item '{$equipmentName}' is due in 7 days.")
+                ->line('Please return it on time.'),
+            'due_today' => (new MailMessage)
+                ->subject('Reminder: Item Due Today')
+                ->line("The item '{$equipmentName}' is due today.")
+                ->line('Please return it as soon as possible.'),
+            'overdue' => (new MailMessage)
+                ->subject('Overdue Item Notice')
+                ->line("The item '{$equipmentName}' is overdue.")
+                ->line('Please return it immediately.'),
+            default => (new MailMessage)
+                ->subject('Item Update')
+                ->line("Update regarding '{$equipmentName}'."),
+        };
     }
 
-    public function via(object $notifiable): array
-    {
-        // For now → always send email (we’ll refine later)
-        return ['mail'];
-    }
-
-    public function toMail(object $notifiable): MailMessage
+    /*public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
             ->subject('LabSync Notification')
@@ -76,5 +60,5 @@ class ItemStatusNotification extends Notification
             ->line('Reason: ' . $this->reason)
             ->line('Item: ' . ($this->item->name ?? 'Unknown Item'))
             ->line('Thank you for using LabSync!');
-    }
+    }*/
 }
