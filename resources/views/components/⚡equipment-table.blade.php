@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Equipment;
+use App\Models\CheckoutRequest;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -56,6 +57,7 @@ new class extends Component {
             ->orderBy('name')
             ->paginate(10);
     }
+
 };
 ?>
 
@@ -83,6 +85,7 @@ new class extends Component {
                 <option value="available">Available</option>
                 <option value="in_use">In Use</option>
                 <option value="maintenance">Maintenance</option>
+                <option value="retired">Retired</option>
             </select>
 
             @if($isAdmin)
@@ -178,6 +181,7 @@ new class extends Component {
                             </div>
                         @else
                             <button
+                                dusk="select-equipment-{{ $item->id }}"
                                 wire:click="initiateCheckout({{ $item->id }})"
                                 @disabled($item->status !== 'available')
                                 class="px-3 py-1.5 text-sm font-medium rounded transition-colors data-[loading]:opacity-50 disabled:opacity-50 disabled:cursor-not-allowed

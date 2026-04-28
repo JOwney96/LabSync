@@ -1,15 +1,27 @@
 <?php
 
 use App\Models\AdminRoutesEnum;
+use App\Models\CheckoutRequest;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Collection;
 use Livewire\Component;
 use Livewire\Features\SupportRedirects\Redirector;
 
 new class extends Component {
     //
     public int $pendingRequestsCount = 0;
-    public array $pendingRequests = [];
+    public Collection $pendingRequests;
     public string $searchQuery = '';
+
+    public function mount()
+    {
+        $this->pendingRequests = CheckoutRequest::with(['user', 'equipment'])
+            ->where('status', 'pending')
+            ->latest()
+            ->get();
+
+        $this->pendingRequestsCount = $this->pendingRequests->count();
+    }
 
     public function logout(): void
     {
