@@ -154,6 +154,7 @@ new class extends Component {
 
                             @if($request->status === 'pending')
                                 <button
+                                    dusk="cancel-request"
                                     wire:click="cancelRequest({{ $request->id }})"
                                     wire:confirm="Are you sure you want to cancel this request?"
                                     class="text-sm font-medium text-slate-500 hover:text-status-error underline decoration-slate-300 hover:decoration-status-error transition-colors data-[loading]:opacity-50"
