@@ -21,4 +21,5 @@ new class extends Component {
 
         <livewire:equipment-table :is-admin="true"/>
     </div>
+    <livewire:equipment-modal />
 </div>
