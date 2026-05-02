@@ -66,4 +66,44 @@ class EquipmentManagementTest extends DuskTestCase
                 ->assertSee('Automated Test');
         });
     }
+
+    public function test_admin_can_edit_equipment_details(): void
+    {
+        $this->browse(function (Browser $browser) {
+
+            // Step 1-3: Open browser, go to site, log in
+            $this->login($browser);
+
+            // Step 4: Navigate to equipment page and edit equipment details
+            $browser
+                ->visit($this->appUrl . '/admin/equipment')
+                ->waitForText('Equipment Inventory')
+                ->waitFor('tbody tr', 10)
+                ->clickAtXPath('//tbody/tr[1]//button[@dusk]')
+                ->waitFor('[dusk="edit-details"]', 10)
+                ->click('[dusk="edit-details"]')
+                ->waitForText('Edit Equipment');
+
+            // Step 7: Update some fields
+            $browser
+                ->clear('input[wire\\:model="name"]')
+                ->type('input[wire\\:model="name"]', 'Dusk Edited Equipment')
+                ->clear('input[wire\\:model="category"]')
+                ->type('input[wire\\:model="category"]', 'Dusk Category');
+
+            // Step 8: Save
+            $browser
+                ->press('Save Changes')
+                ->waitUntilMissing('[x-show="show"]'); // wait for modal to close
+
+            // Step 9: Verify changes appear in the table
+            // Search to find it regardless of pagination
+            $browser
+                ->waitFor('input[placeholder="Search by name or ID..."]')
+                ->type('input[placeholder="Search by name or ID..."]', 'Dusk Edited Equipment')
+                ->waitForText('Dusk Edited Equipment')
+                ->assertSee('Dusk Edited Equipment')
+                ->assertSee('Dusk Category');
+        });
+    }
 }

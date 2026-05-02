@@ -167,7 +167,8 @@ new class extends Component {
                     <td class="p-4 text-right">
                         @if($isAdmin)
                             <div x-data="{ menuOpen: false }" class="relative inline-block text-left">
-                                <button @click="menuOpen = !menuOpen" @click.away="menuOpen = false"
+                                <button dusk="row-actions-{{ $item->id }}"
+                                        @click="menuOpen = !menuOpen" @click.away="menuOpen = false"
                                         class="text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-surface-200 transition-colors">
                                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                         <path
@@ -176,7 +177,7 @@ new class extends Component {
                                 </button>
                                 <div x-show="menuOpen" x-transition x-cloak
                                      class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-surface-200 z-50 overflow-hidden">
-                                    <button
+                                    <button dusk="edit-details"
                                         @click="$dispatch('open-equipment-modal', { equipmentId: {{ $item->id }} }); menuOpen = false"
                                         class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-surface-50">
                                         Edit Details
