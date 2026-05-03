@@ -2,42 +2,28 @@
 
 namespace Tests\Browser;
 
+use App\Models\User;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Dusk\Browser;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\DuskTestCase;
 
 class EquipmentManagementTest extends DuskTestCase
 {
-    // =========================================================
-    // CONFIGURE THESE FOR YOUR MACHINE
-    // =========================================================
-    private string $appUrl        = 'http://127.0.0.1:8000';
-    private string $adminEmail    = 'admin@email.com';
-    private string $adminPassword = 'password';
-    // =========================================================
-
-    private function login(Browser $browser): void
-    {
-        $browser->driver->manage()->deleteAllCookies();
-
-        $browser
-            ->visit($this->appUrl . '/login')
-            ->waitFor('input[name="email"]')
-            ->type('email', $this->adminEmail)
-            ->type('password', $this->adminPassword)
-            ->click('button[type="submit"]')
-            ->waitForLocation('/admin/dashboard');
-    }
+    use DatabaseMigrations;
 
     public function test_admin_can_add_new_equipment(): void
     {
         $this->browse(function (Browser $browser) {
+            $user = $this->createUser('Admin', 'adminTest@email.com', 'admin');
 
-            // Step 1-3: Open browser, go to site, log in
-            $this->login($browser);
+            $browser->loginAs($user);
 
             // Step 4: Navigate to equipment page and click Add Equipment
             $browser
-                ->visit($this->appUrl . '/admin/equipment')
+                ->visit('/admin/equipment')
                 ->waitForText('Equipment Inventory')
                 ->waitForText('+ Add Equipment')
                 ->press('+ Add Equipment')
@@ -67,33 +53,55 @@ class EquipmentManagementTest extends DuskTestCase
         });
     }
 
+    private function createUser(string $name, string $email, string $roleName): User
+    {
+        $role = Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
+
+        $user = User::createOrFirst(
+            ['email' => $email],
+            [
+                'name' => $name,
+                'password' => Hash::make("password"),
+                'role' => $roleName,
+                'email_verified_at' => now(),
+            ]
+        );
+
+        $user->syncRoles([$role]);
+
+        return $user;
+    }
+
     public function test_admin_can_edit_equipment_details(): void
     {
         $this->browse(function (Browser $browser) {
+            $user = $this->createUser('Admin', 'adminTest@email.com', 'admin');
 
-            // Step 1-3: Open browser, go to site, log in
-            $this->login($browser);
+            $browser->loginAs($user);
 
             // Step 4: Navigate to equipment page and edit equipment details
             $browser
-                ->visit($this->appUrl . '/admin/equipment')
+                ->visit('/admin/equipment')
                 ->waitForText('Equipment Inventory')
                 ->waitFor('tbody tr', 10)
-                ->clickAtXPath('//tbody/tr[1]//button[@dusk]')
-                ->waitFor('[dusk="edit-details"]', 10)
-                ->click('[dusk="edit-details"]')
-                ->waitForText('Edit Equipment');
+                ->click('#add-equipment-button');
 
             // Step 7: Update some fields
+            $name = 'input[wire\\:model="name"]';
+            $category = 'input[wire\\:model="category"]';
+            $tag_id = 'input[wire\\:model="tag_id"]';
+
             $browser
-                ->clear('input[wire\\:model="name"]')
-                ->type('input[wire\\:model="name"]', 'Dusk Edited Equipment')
-                ->clear('input[wire\\:model="category"]')
-                ->type('input[wire\\:model="category"]', 'Dusk Category');
+                ->clear($name)
+                ->type($name, 'Dusk Edited Equipment')
+                ->clear($category)
+                ->type($category, 'Dusk Category')
+                ->clear($tag_id)
+                ->type($tag_id, 'LAB-0095');
 
             // Step 8: Save
             $browser
-                ->press('Save Changes')
+                ->click('#save-button')
                 ->waitUntilMissing('[x-show="show"]'); // wait for modal to close
 
             // Step 9: Verify changes appear in the table
@@ -105,5 +113,25 @@ class EquipmentManagementTest extends DuskTestCase
                 ->assertSee('Dusk Edited Equipment')
                 ->assertSee('Dusk Category');
         });
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+    }
+
+    private function login(Browser $browser, User $user): void
+    {
+        $browser->driver->manage()->deleteAllCookies();
+
+        $browser
+            ->visit('/login')
+            ->waitFor('input[name="email"]')
+            ->type('email', $user->email)
+            ->type('password', $user->password)
+            ->click('button[type="submit"]')
+            ->waitForLocation('/admin/dashboard');
     }
 }

@@ -4,11 +4,14 @@ namespace Tests\Browser;
 
 use App\Models\Equipment;
 use App\Models\User;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Laravel\Dusk\Browser;
 use Tests\DuskTestCase;
 
 class SearchInventoryTest extends DuskTestCase
 {
+    use DatabaseMigrations;
+
     public function test_inventory_search_filters_results(): void
     {
         $admin = User::factory()->create([
@@ -38,14 +41,11 @@ class SearchInventoryTest extends DuskTestCase
             $browser->loginAs($admin)
                 ->visit('/admin/equipment')
                 ->waitForText('Equipment Inventory', 10)
-
                 ->click('input[placeholder="Search by name or ID..."]')
                 ->keys('input[placeholder="Search by name or ID..."]', ['{control}', 'a'])
                 ->keys('input[placeholder="Search by name or ID..."]', ['{backspace}'])
                 ->keys('input[placeholder="Search by name or ID..."]', $matchingTag)
-
                 ->pause(1500)
-
                 ->assertSee('Dusk Test Microscope')
                 ->assertSee($matchingTag)
                 ->assertDontSee('Dusk Hidden Laptop');

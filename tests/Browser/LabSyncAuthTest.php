@@ -3,25 +3,20 @@
 namespace Tests\Browser;
 
 use App\Models\User;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Dusk\Browser;
-use Tests\DuskTestCase;
-use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
+use Tests\DuskTestCase;
 
 class LabSyncAuthTest extends DuskTestCase
 {
     use DatabaseTruncation;
+    use DatabaseMigrations;
 
     private const PASSWORD = 'test1234';
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
-    }
 
     public function testValidLoginAdmin(): void
     {
@@ -32,6 +27,39 @@ class LabSyncAuthTest extends DuskTestCase
                 ->waitForLocation('/admin/dashboard', 10)
                 ->assertPathIs('/admin/dashboard');
         });
+    }
+
+    private function createUser(string $name, string $email, string $roleName): User
+    {
+        $role = Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
+
+        $user = User::updateOrCreate(
+            ['email' => $email],
+            [
+                'name' => $name,
+                'password' => Hash::make(self::PASSWORD),
+                'role' => $roleName,
+                'email_verified_at' => now(),
+            ]
+        );
+
+        $user->syncRoles([$role]);
+
+        return $user;
+    }
+
+    private function logIn(Browser $browser, string $email): Browser
+    {
+        $browser->driver->manage()->deleteAllCookies();
+
+        return $browser->visit('/login')
+            ->waitFor('#email')
+            ->click('#email')
+            ->type('#email', $email)
+            ->click('#password')
+            ->type('#password', self::PASSWORD)
+            ->pause(500)
+            ->click('@login-button');
     }
 
     public function testValidLoginStudent(): void
@@ -75,54 +103,6 @@ class LabSyncAuthTest extends DuskTestCase
         });
     }
 
-    public function testLogoutStudent(): void
-    {
-        $this->createUser('Student QA', 'studentqa@email.com', 'student');
-
-        $this->browse(function (Browser $browser) {
-            $this->logIn($browser, 'studentqa@email.com')
-                ->waitForLocation('/dashboard');
-
-            $this->submitLogout($browser);
-
-            $browser->waitForLocation('/register', 10)
-                ->assertPathIs('/register');
-        });
-    }
-
-    private function createUser(string $name, string $email, string $roleName): User
-    {
-        $role = Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
-
-        $user = User::updateOrCreate(
-            ['email' => $email],
-            [
-                'name' => $name,
-                'password' => Hash::make(self::PASSWORD),
-                'role' => $roleName,
-                'email_verified_at' => now(),
-            ]
-        );
-
-        $user->syncRoles([$role]);
-
-        return $user;
-    }
-
-    private function logIn(Browser $browser, string $email): Browser
-    {
-        $browser->driver->manage()->deleteAllCookies();
-
-        return $browser->visit('/login')
-            ->waitFor('#email')
-            ->click('#email')
-            ->type('#email', $email)
-            ->click('#password')
-            ->type('#password', self::PASSWORD)
-            ->pause(500)
-            ->click('@login-button');
-    }
-
     private function submitLogout(Browser $browser): void
     {
         $browser->script(<<<'JS'
@@ -139,6 +119,29 @@ input.value = token;
 form.appendChild(input);
 document.body.appendChild(form);
 form.submit();
-JS);
+JS
+        );
+    }
+
+    public function testLogoutStudent(): void
+    {
+        $this->createUser('Student QA', 'studentqa@email.com', 'student');
+
+        $this->browse(function (Browser $browser) {
+            $this->logIn($browser, 'studentqa@email.com')
+                ->waitForLocation('/dashboard');
+
+            $this->submitLogout($browser);
+
+            $browser->waitForLocation('/register', 10)
+                ->assertPathIs('/register');
+        });
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
 }
