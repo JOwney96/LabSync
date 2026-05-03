@@ -17,10 +17,10 @@ new class extends Component {
     protected function rules(): array
     {
         return [
-            'name'            => 'required|string|max:255',
-            'tag_id'          => 'required|string|max:100|unique:equipment,tag_id,' . ($this->equipmentId !== -1 ? $this->equipmentId : 'NULL'),
-            'category'        => 'required|string|max:100',
-            'status'          => 'required|in:available,in_use,maintenance,retired',
+            'name' => 'required|string|max:255',
+            'tag_id' => 'required|string|max:100|unique:equipment,tag_id,' . ($this->equipmentId !== -1 ? $this->equipmentId : 'NULL'),
+            'category' => 'required|string|max:100',
+            'status' => 'required|in:available,in_use,maintenance,retired',
             'calibration_due' => 'nullable|date',
         ];
     }
@@ -38,10 +38,10 @@ new class extends Component {
                 return;
             }
 
-            $this->name            = $equipment->name;
-            $this->tag_id          = $equipment->tag_id;
-            $this->category        = $equipment->category;
-            $this->status          = $equipment->status;
+            $this->name = $equipment->name;
+            $this->tag_id = $equipment->tag_id;
+            $this->category = $equipment->category;
+            $this->status = $equipment->status;
             $this->calibration_due = $equipment->calibration_due?->format('Y-m-d');
         } else {
             $this->reset(['name', 'tag_id', 'category', 'status', 'calibration_due']);
@@ -56,10 +56,10 @@ new class extends Component {
         Equipment::updateOrCreate(
             ['id' => $this->equipmentId !== -1 ? $this->equipmentId : null],
             [
-                'name'            => $this->name,
-                'tag_id'          => $this->tag_id,
-                'category'        => $this->category,
-                'status'          => $this->status,
+                'name' => $this->name,
+                'tag_id' => $this->tag_id,
+                'category' => $this->category,
+                'status' => $this->status,
                 'calibration_due' => $this->calibration_due ?: null,
             ]
         );
@@ -139,9 +139,10 @@ new class extends Component {
                         class="px-4 py-2 text-sm font-medium text-slate-600 bg-surface-100 hover:bg-surface-200 rounded-md transition-colors">
                     Cancel
                 </button>
-                <button wire:click="save" wire:loading.attr="disabled"
+                <button wire:click="save" wire:loading.attr="disabled" id="save-button" type="submit" name="save"
                         class="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md shadow-sm transition-colors disabled:opacity-50">
-                    <span wire:loading.remove wire:target="save">{{ $equipmentId !== -1 ? 'Save Changes' : 'Add Equipment' }}</span>
+                    <span wire:loading.remove
+                          wire:target="save">{{ $equipmentId !== -1 ? 'Save Changes' : 'Add Equipment' }}</span>
                     <span wire:loading wire:target="save">Saving...</span>
                 </button>
             </div>

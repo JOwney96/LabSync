@@ -20,7 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })
-    ->withSchedule(function (Schedule $schedule) {
+    ->withSchedule(function (\Illuminate\Console\Scheduling\Schedule $schedule) {
         $schedule->call(function () {
             SendDueNotifications::handle();
         })->daily();

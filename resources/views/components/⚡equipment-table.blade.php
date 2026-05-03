@@ -98,7 +98,8 @@ new class extends Component {
             </select>
 
             @if($isAdmin)
-                <button @click="$dispatch('open-equipment-modal')"
+                <button @click="$dispatch('open-equipment-modal')" id="add-equipment-button" type="button"
+                        name="add-equipment"
                         class="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md shadow-sm transition-colors">
                     + Add Equipment
                 </button>
@@ -178,8 +179,8 @@ new class extends Component {
                                 <div x-show="menuOpen" x-transition x-cloak
                                      class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-surface-200 z-50 overflow-hidden">
                                     <button dusk="edit-details"
-                                        @click="$dispatch('open-equipment-modal', { equipmentId: {{ $item->id }} }); menuOpen = false"
-                                        class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-surface-50">
+                                            @click="$dispatch('open-equipment-modal', { equipmentId: {{ $item->id }} }); menuOpen = false"
+                                            class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-surface-50">
                                         Edit Details
                                     </button>
 
