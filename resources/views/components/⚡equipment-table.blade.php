@@ -1,7 +1,9 @@
 <?php
 
 use App\Models\Equipment;
+use App\Models\CheckoutRequest;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -39,6 +41,14 @@ new class extends Component {
         $this->dispatch('open-checkout-modal', equipmentId: $equipmentId);
     }
 
+    #[On('equipment-saved')]
+    public function refreshTable(): void
+    {
+        // The #[Computed] property re-runs automatically,
+        // but flash the page for good UX
+        session()->flash('message', 'Equipment list updated.');
+    }
+
     // The #[Computed] attribute elegantly handles passing data to the view
     #[Computed]
     public function equipments()
@@ -56,6 +66,7 @@ new class extends Component {
             ->orderBy('name')
             ->paginate(10);
     }
+
 };
 ?>
 
@@ -83,11 +94,12 @@ new class extends Component {
                 <option value="available">Available</option>
                 <option value="in_use">In Use</option>
                 <option value="maintenance">Maintenance</option>
+                <option value="retired">Retired</option>
             </select>
 
             @if($isAdmin)
-                <button
-                    class="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md shadow-sm transition-colors">
+                <button @click="$dispatch('open-equipment-modal')"
+                        class="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md shadow-sm transition-colors">
                     + Add Equipment
                 </button>
             @endif
@@ -155,7 +167,8 @@ new class extends Component {
                     <td class="p-4 text-right">
                         @if($isAdmin)
                             <div x-data="{ menuOpen: false }" class="relative inline-block text-left">
-                                <button @click="menuOpen = !menuOpen" @click.away="menuOpen = false"
+                                <button dusk="row-actions-{{ $item->id }}"
+                                        @click="menuOpen = !menuOpen" @click.away="menuOpen = false"
                                         class="text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-surface-200 transition-colors">
                                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                         <path
@@ -164,8 +177,11 @@ new class extends Component {
                                 </button>
                                 <div x-show="menuOpen" x-transition x-cloak
                                      class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-surface-200 z-50 overflow-hidden">
-                                    <a href="#" class="block px-4 py-2 text-sm text-slate-700 hover:bg-surface-50">Edit
-                                        Details</a>
+                                    <button dusk="edit-details"
+                                        @click="$dispatch('open-equipment-modal', { equipmentId: {{ $item->id }} }); menuOpen = false"
+                                        class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-surface-50">
+                                        Edit Details
+                                    </button>
 
                                     <button
                                         wire:click="toggleMaintenance({{ $item->id }})"
