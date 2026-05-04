@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\AdminRoutesEnum;
+use App\Models\CheckoutRequest;
 use Illuminate\Http\RedirectResponse;
 use Livewire\Component;
 use Livewire\Features\SupportRedirects\Redirector;
@@ -9,6 +11,60 @@ new class extends Component {
     public int $pendingRequestsCount = 0;
     public array $pendingRequests = [];
     public string $searchQuery = '';
+
+    public function mount()
+    {
+        $this->pendingRequests = CheckoutRequest::with(['user', 'equipment'])
+            ->where('status', 'pending')
+            ->latest()
+            ->get()
+            ->map(function ($request) {
+                $arr = $request->toArray();
+                $arr['duration_days'] = \Carbon\Carbon::parse($request->start_date)
+                    ->diffInDays($request->end_date);
+                return $arr;
+            })
+            ->toArray();
+
+        $this->pendingRequestsCount = count($this->pendingRequests);
+    }
+
+    public function approveRequest(int $requestId): void
+    {
+        $request = CheckoutRequest::find($requestId);
+
+        if ($request === null) {
+            return;
+        }
+
+        $request->update(['status' => 'approved']);
+        $request->equipment->update(['status' => 'in_use']);
+
+        $this->pendingRequests = array_values(array_filter(
+            $this->pendingRequests,
+            fn($r) => $r['id'] !== $requestId
+        ));
+
+        $this->pendingRequestsCount = count($this->pendingRequests);
+    }
+
+    public function denyRequest(int $requestId): void
+    {
+        $request = CheckoutRequest::find($requestId);
+
+        if ($request === null) {
+            return;
+        }
+
+        $request->update(['status' => 'denied']);
+
+        $this->pendingRequests = array_values(array_filter(
+            $this->pendingRequests,
+            fn($r) => $r['id'] !== $requestId
+        ));
+
+        $this->pendingRequestsCount = count($this->pendingRequests);
+    }
 
     public function logout(): void
     {
@@ -22,7 +78,7 @@ new class extends Component {
 
 <div class="min-h-screen bg-surface-50 flex font-sans text-slate-800" x-data="{ sidebarOpen: false }">
 
-    <x-admin-aside/>
+    <x-admin-aside :route="AdminRoutesEnum::DASHBOARD"/>
 
     <main class="flex-1 flex flex-col h-screen overflow-hidden">
 
@@ -80,21 +136,21 @@ new class extends Component {
                         <div
                             class="p-4 border-b border-surface-200 flex items-center justify-between hover:bg-surface-50 transition-colors">
                             <div>
-                                <p class="font-medium text-slate-800">{{ $request->equipment->name }} <span
-                                        class="text-xs font-mono text-slate-500 ml-2">ID: {{ $request->equipment->tag_id }}</span>
+                                <p class="font-medium text-slate-800">{{ $request['equipment']['name'] }} <span
+                                        class="text-xs font-mono text-slate-500 ml-2">ID: {{ $request['equipment']['tag_id'] }}</span>
                                 </p>
-                                <p class="text-sm text-slate-500">Requested by: {{ $request->user->name }} •
-                                    For: {{ $request->duration_days }} Days</p>
+                                <p class="text-sm text-slate-500">Requested by: {{ $request['user']['name'] }} •
+                                    For: {{ $request['duration_days'] }} Days</p>
                             </div>
                             <div class="flex space-x-2">
                                 <button
-                                    wire:click="denyRequest({{ $request->id }})"
+                                    wire:click="denyRequest({{ $request['id'] }})"
                                     wire:loading.attr="disabled"
                                     class="px-3 py-1.5 text-sm font-medium text-status-error bg-status-error/10 hover:bg-status-error hover:text-white rounded transition-colors disabled:opacity-50">
                                     Deny
                                 </button>
                                 <button
-                                    wire:click="approveRequest({{ $request->id }})"
+                                    wire:click="approveRequest({{ $request['id'] }})"
                                     wire:loading.attr="disabled"
                                     class="px-3 py-1.5 text-sm font-medium text-white bg-primary-500 hover:bg-primary-600 shadow-sm rounded transition-colors disabled:opacity-50">
                                     Approve
@@ -123,4 +179,5 @@ new class extends Component {
 
         </div>
     </main>
+    <livewire:equipment-modal />
 </div>

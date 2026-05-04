@@ -5,6 +5,8 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
+use App\Models\AdminRoutesEnum;
+use App\Notifications\ItemStatusNotification;
 
 new class extends Component {
     use WithPagination;
@@ -17,12 +19,14 @@ new class extends Component {
         $this->resetPage();
     }
 
-    // --- Admin Actions ---
+    // --- Admin Actions ---   tied notification with admin approval
 
     public function approve($id)
     {
-        $request = CheckoutRequest::findOrFail($id);
+        $request = CheckoutRequest::with(['user', 'equipment'])->findOrFail($id);
         $request->update(['status' => 'approved']);
+
+        $request->user->notify(new ItemStatusNotification($request->equipment, 'reserved'));
 
         session()->flash('message', "Request for {$request->user->name} approved.");
     }
@@ -47,10 +51,12 @@ new class extends Component {
         session()->flash('message', "Item marked as picked up.");
     }
 
-    public function markReturned($id)
+    public function markReturned($id)    // tied notification to return
     {
-        $request = CheckoutRequest::findOrFail($id);
+        $request = CheckoutRequest::with(['user', 'equipment'])->findOrFail($id);
         $request->update(['status' => 'returned']);
+
+        $request->user->notify(new ItemStatusNotification($request->equipment, 'returned'));
 
         session()->flash('message', "Item logged as returned.");
     }
@@ -74,7 +80,7 @@ new class extends Component {
 ?>
 
 <div class="flex bg-surface-50 min-h-screen">
-    <x-admin-aside/>
+    <x-admin-aside :route="AdminRoutesEnum::REQUESTS"/>
     <div class="p-8 max-w-7xl mx-auto w-full">
 
         <div class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-surface-200 pb-4">

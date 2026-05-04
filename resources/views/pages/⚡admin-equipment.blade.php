@@ -1,5 +1,16 @@
+<?php
+
+use App\Models\AdminRoutesEnum;
+use Livewire\Component;
+
+new class extends Component {
+    //
+}
+
+?>
+
 <div class="flex min-h-screen mx-auto bg-surface-50">
-    <x-admin-aside/>
+    <x-admin-aside :route="AdminRoutesEnum::EQUIPMENT"/>
 
     <div class="p-8 max-w-7xl mx-auto w-full">
         <div class="mb-8">
@@ -10,4 +21,5 @@
 
         <livewire:equipment-table :is-admin="true"/>
     </div>
+    <livewire:equipment-modal />
 </div>
